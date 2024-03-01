@@ -125,8 +125,8 @@ int main(int argc, const char *argv[]) {
 
     // push keypoints and descriptor for current frame to end of data buffer
     // (dataBuffer.end() - 1)->keypoints = keypoints;
-    DataFrame lastFrame = dataBuffer->getLastFrame();
-    lastFrame.keypoints = keypoints;
+    DataFrame *lastFrame = dataBuffer->getLastFrame();
+    lastFrame->keypoints = keypoints;
     cout << "#2 : DETECT KEYPOINTS done" << endl;
 
     /* EXTRACT KEYPOINT DESCRIPTORS */
@@ -139,12 +139,12 @@ int main(int argc, const char *argv[]) {
 
     cv::Mat descriptors;
     string descriptorType = "BRISK"; // BRIEF, ORB, FREAK, AKAZE, SIFT
-    descKeypoints(lastFrame.keypoints, lastFrame.cameraImg, descriptors,
+    descKeypoints(lastFrame->keypoints, lastFrame->cameraImg, descriptors,
                   descriptorType);
     //// EOF STUDENT ASSIGNMENT
 
     // push descriptors for current frame to end of data buffer
-    lastFrame.descriptors = descriptors;
+    lastFrame->descriptors = descriptors;
 
     cout << "#3 : EXTRACT DESCRIPTORS done" << endl;
 
@@ -163,24 +163,24 @@ int main(int argc, const char *argv[]) {
       //// TASK MP.5 -> add FLANN matching in file matching2D.cpp
       //// TASK MP.6 -> add KNN match selection and perform descriptor distance
       /// ratio filtering with t=0.8 in file matching2D.cpp
-      DataFrame currentFrame = dataBuffer->getSecondLastFrame();
-      matchDescriptors(currentFrame.keypoints, lastFrame.keypoints,
-                       currentFrame.descriptors, lastFrame.descriptors, matches,
-                       descriptorType, matcherType, selectorType);
+      DataFrame *currentFrame = dataBuffer->getSecondLastFrame();
+      matchDescriptors(currentFrame->keypoints, lastFrame->keypoints,
+                       currentFrame->descriptors, lastFrame->descriptors,
+                       matches, descriptorType, matcherType, selectorType);
 
       //// EOF STUDENT ASSIGNMENT
 
       // store matches in current data frame
-      lastFrame.kptMatches = matches;
+      lastFrame->kptMatches = matches;
 
       cout << "#4 : MATCH KEYPOINT DESCRIPTORS done" << endl;
 
       // visualize matches between current and previous image
       bVis = true;
       if (bVis) {
-        cv::Mat matchImg = (lastFrame.cameraImg).clone();
-        cv::drawMatches(currentFrame.cameraImg, currentFrame.keypoints,
-                        lastFrame.cameraImg, lastFrame.keypoints, matches,
+        cv::Mat matchImg = (lastFrame->cameraImg).clone();
+        cv::drawMatches(currentFrame->cameraImg, currentFrame->keypoints,
+                        lastFrame->cameraImg, lastFrame->keypoints, matches,
                         matchImg, cv::Scalar::all(-1), cv::Scalar::all(-1),
                         vector<char>(),
                         cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);

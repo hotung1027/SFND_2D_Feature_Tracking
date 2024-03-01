@@ -33,13 +33,13 @@ public:
   ~FrameQueue() {}
 
   // get the size of the queue
-  int size() { return (int)this->dataBuffer.size(); }
+  int size() { return this->dataBuffer.size(); }
   // obtain the next frame from the queue
-  DataFrame getNextFrame();
+  DataFrame *getNextFrame();
   // obtain the last frame from the queue
-  DataFrame getLastFrame();
+  DataFrame *getLastFrame();
   // obtain the second last frame from the queu
-  DataFrame getSecondLastFrame();
+  DataFrame *getSecondLastFrame();
   // Push the new frame to the back of the queue
   void push(DataFrame frame);
 };
@@ -51,7 +51,7 @@ inline void FrameQueue::push(DataFrame frame) {
 
     return;
   }
-  if ((int)this->dataBuffer.size() < BUFFER_SIZE - 1) {
+  if (this->dataBuffer.size() < BUFFER_SIZE) {
     this->dataBuffer.push(frame);
     this->currentFrame = this->lastFrame;
     this->lastFrame = frame;
@@ -63,12 +63,14 @@ inline void FrameQueue::push(DataFrame frame) {
     this->lastFrame = frame;
   }
 }
-inline DataFrame FrameQueue::getNextFrame() {
-  DataFrame frame = this->dataBuffer.front();
+inline DataFrame *FrameQueue::getNextFrame() {
+  DataFrame *frame = &(this->dataBuffer.front());
   this->dataBuffer.pop();
   return frame;
 };
-inline DataFrame FrameQueue::getLastFrame() { return this->lastFrame; };
-inline DataFrame FrameQueue::getSecondLastFrame() { return this->currentFrame; }
+inline DataFrame *FrameQueue::getLastFrame() { return &(this->lastFrame); };
+inline DataFrame *FrameQueue::getSecondLastFrame() {
+  return &(this->currentFrame);
+}
 
 #endif /* dataStructures_h */
