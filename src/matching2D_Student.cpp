@@ -19,6 +19,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource,
     matcher = cv::BFMatcher::create(normType, crossCheck);
   } else if (matcherType.compare("MAT_FLANN") == 0) {
     // TODO : Use FLANN Matcher
+    matcher = cv::FlannBasedMatcher::create();
   }
 
   // TODO : perform matching task
@@ -29,11 +30,19 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource,
         matches); // Finds the best match for each descriptor in desc1
   } else if (selectorType.compare("SEL_KNN") ==
              0) { // k nearest neighbors (k=2)
-
-    // ...
+    // Flatten KNN Match point into Matches
+    std::vector<std::vector<cv::DMatch>> knnMatches;
+    matcher->knnMatch(descSource, descRef, knnMatches, 2);
+    for (auto it = knnMatches.begin(); it != knnMatches.end(); it++) {
+      matches.insert(matches.end(), it->begin(), it->end());
+    }
   }
 }
-
+cv::Mat blurImage(cv::Mat &img, int radius) {
+  cv::Mat imgBlur;
+  cv::GaussianBlur(img, imgBlur, cv::Size(radius, radius), 0);
+  return imgBlur;
+}
 // Use one of several types of state-of-art descriptors to uniquely identify
 // keypoints
 void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
@@ -103,3 +112,23 @@ void detKeypointsShiTomasi(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
     cv::waitKey(0);
   }
 }
+void detKeypointsHarris(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
+                        bool bVis) {
+  // compute detector parameters
+  int blockSize = 3;
+  int apertureSize = 3;
+  double k = 0.5;
+  cv::Mat imgBlur = blurImage(img, blockSize);
+  cv::Mat dst = cv::Mat::zeros(imgBlur.size(), CV_32FC1);
+  cornerHarris(imgBlur, dst, blockSize, apertureSize, k);
+  cv::Mat dst_norm, dst_norm_scaled;
+  normalize(dst, dst_norm, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat());
+  convertScaleAbs(dst_norm, dst_norm_scaled);
+  for (int i = 0; i < dst_norm_scaled.rows; i++) {
+    for (int j = 0; j < dst_norm_scaled.cols; j++) {
+      keypoints.push_back(cv::KeyPoint(cv::Point(j, i), apertureSize));
+    }
+  }
+}
+void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img,
+                        std::string detectorType, bool bVis) {}
