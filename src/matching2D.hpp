@@ -32,4 +32,14 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource,
                       std::string descriptorType, std::string matcherType,
                       std::string selectorType);
 
+enum class DetectorType : int {
+  HARRIS = 0,
+  SHITOMASI,
+  BRISK,
+  BRIEF,
+  FAST,
+  ORB,
+  SIFT,
+  AKAZE
+};
 #endif /* matching2D_hpp */
