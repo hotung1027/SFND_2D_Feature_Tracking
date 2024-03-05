@@ -59,6 +59,7 @@ void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
     extractor = cv::BRISK::create(threshold, octaves, patternScale);
   } else {
     // TODO :  Use ORB detectors
+    cv::Ptr<cv::DescriptorExtractor> extrator = cv::ORB::create();
   }
 
   // perform feature description

@@ -1,9 +1,12 @@
 /* INCLUDES FOR THIS PROJECT */
+#include "dataStructures.h"
+#include "matching2D.hpp"
 #include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <map>
 #include <opencv2/core.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -12,9 +15,6 @@
 #include <opencv2/xfeatures2d/nonfree.hpp>
 #include <sstream>
 #include <vector>
-
-#include "dataStructures.h"
-#include "matching2D.hpp"
 
 using namespace std;
 
@@ -48,8 +48,7 @@ int main(int argc, const char *argv[]) {
 
   /* MAIN LOOP OVER ALL IMAGES */
 
-  for (size_t imgIndex = 0; imgIndex <= imgEndIndex - imgStartIndex;
-       imgIndex++) {
+  for (int imgIndex = 0; imgIndex <= imgEndIndex - imgStartIndex; imgIndex++) {
     /* LOAD IMAGE INTO BUFFER */
 
     // assemble filenames for current index
@@ -83,17 +82,51 @@ int main(int argc, const char *argv[]) {
     string detectorType = "SHITOMASI";
 
     vector<string> detectorTypeToUse =
-        vector<string>{"SHITOMASI", "FAST", "BRISK", "BRIEF"};
+        vector<string>{"HARRIS", "SHITOMASI", "BRISK", "BRIEF",
+                       "FAST",   "ORB",       "SIFT",  "AKAZE"};
     //// STUDENT ASSIGNMENT
     //// TODO :TASK MP.2 -> add the following keypoint detectors in file
     /// matching2D.cpp and enable string-based selection based on detectorType /
     ///-> HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
 
-    if (detectorType.compare("SHITOMASI") == 0) {
-      detKeypointsShiTomasi(keypoints, imgGray, false);
-    } else {
-      //...
+    const std::map<std::string, DetectorType> detectorDict{
+        {"HARRIS", DetectorType::HARRIS},
+        {"SHITOMASI", DetectorType::SHITOMASI},
+        {"BRISK", DetectorType::BRISK},
+        {"BRIEF", DetectorType::BRIEF},
+        {"FAST", DetectorType::FAST},
+        {"ORB", DetectorType::ORB},
+        {"SIFT", DetectorType::SIFT},
+        {"AKAZE", DetectorType::AKAZE}};
+
+    switch (detectorDict.at(detectorType)) {
+    case DetectorType::SHITOMASI: {
+
+      detKeypointsShiTomasi(keypoints, imgGray, bVis);
+    } break;
+    case DetectorType::FAST: {
+      detKeypointsModern(keypoints, imgGray, "FAST");
+    } break;
+    case DetectorType::HARRIS: {
+      detKeypointsHarris(keypoints, imgGray, bVis);
+    } break;
+    case DetectorType::BRISK: {
+    } break;
+    case DetectorType::BRIEF: {
+    } break;
+    case DetectorType::ORB: {
+    } break;
+    case DetectorType::AKAZE: {
+    } break;
+    case DetectorType::SIFT: {
+    } break;
     }
+
+    // if (detectorType.compare("SHITOMASI") == 0) {
+    //   detKeypointsShiTomasi(keypoints, imgGray, false);
+    // } else if (detectorType.compare) {
+    //   //...
+    // }
     //// EOF STUDENT ASSIGNMENT
 
     //// STUDENT ASSIGNMENT
@@ -108,8 +141,8 @@ int main(int argc, const char *argv[]) {
 
     //// EOF STUDENT ASSIGNMENT
 
-    // optional : limit number of keypoints (helpful for debugging and learning)
-    // Debug only
+    // optional : limit number of keypoints (helpful for debugging and
+    // learning) Debug only
     bool bLimitKpts = false;
     if (bLimitKpts) {
       int maxKeypoints = 50;
@@ -132,7 +165,7 @@ int main(int argc, const char *argv[]) {
     /* EXTRACT KEYPOINT DESCRIPTORS */
 
     //// STUDENT ASSIGNMENT
-    //// TODO : TASK MP.4 -> add the following descriptors in file
+    /// TODO : TASK MP.4 -> add the following descriptors in file
     /// matching2D.cpp and
     /// enable string-based selection based on descriptorType / -> BRIEF, ORB,
     /// FREAK, AKAZE, SIFT
@@ -159,7 +192,8 @@ int main(int argc, const char *argv[]) {
       string selectorType = "SEL_NN";       // SEL_NN, SEL_KNN
       //// STUDENT ASSIGNMENT
       //// TASK MP.5 -> add FLANN matching in file matching2D.cpp
-      //// TASK MP.6 -> add KNN match selection and perform descriptor distance
+      //// TASK MP.6 -> add KNN match selection and perform descriptor
+      /// distance
       /// ratio filtering with t=0.8 in file matching2D.cpp
       DataFrame *currentFrame = dataBuffer->getSecondLastFrame();
       vector<cv::DMatch> matches;
