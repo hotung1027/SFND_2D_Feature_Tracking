@@ -51,7 +51,7 @@ inline void FrameQueue::push(DataFrame frame) {
 
     return;
   }
-  if (this->dataBuffer.size() < BUFFER_SIZE) {
+  if (this->dataBuffer.size() < (unsigned long)BUFFER_SIZE) {
     this->dataBuffer.push(frame);
     this->currentFrame = this->lastFrame;
     this->lastFrame = frame;
