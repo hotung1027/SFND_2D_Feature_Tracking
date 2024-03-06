@@ -79,7 +79,7 @@ int main(int argc, const char *argv[]) {
     // extract 2D keypoints from current image
     vector<cv::KeyPoint>
         keypoints; // create empty feature list for current image
-    string detectorType = "ORB";
+    string detectorType = "HARRIS";
 
     vector<string> detectorTypeToUse =
         vector<string>{"HARRIS", "SHITOMASI", "BRISK", "BRIEF",
@@ -116,12 +116,14 @@ int main(int argc, const char *argv[]) {
                     }),
           keypoints.end());
     }
+    cout << "Number of keypoints tracking on the vehicle: " << keypoints.size()
+         << endl;
 
     //// EOF STUDENT ASSIGNMENT
 
     // optional : limit number of keypoints (helpful for debugging and
     // learning) Debug only
-    bool bLimitKpts = true;
+    bool bLimitKpts = false;
     if (bLimitKpts) {
       int maxKeypoints = 50;
 
@@ -133,7 +135,6 @@ int main(int argc, const char *argv[]) {
       cv::KeyPointsFilter::retainBest(keypoints, maxKeypoints);
       cout << " NOTE: Keypoints have been limited!" << endl;
     }
-
     // push keypoints and descriptor for current frame to end of data buffer
     // (dataBuffer.end() - 1)->keypoints = keypoints;
     DataFrame *lastFrame = dataBuffer->getLastFrame();
@@ -149,7 +150,7 @@ int main(int argc, const char *argv[]) {
     /// FREAK, AKAZE, SIFT
 
     cv::Mat descriptors;
-    string descriptorType = "ORB"; // BRIEF, ORB, FREAK, AKAZE, SIFT
+    string descriptorType = "BRIEF"; // BRIEF, ORB, FREAK, AKAZE, SIFT
     descKeypoints(lastFrame->keypoints, lastFrame->cameraImg, descriptors,
                   descriptorType);
     //// EOF STUDENT ASSIGNMENT
@@ -165,7 +166,7 @@ int main(int argc, const char *argv[]) {
 
       /* MATCH KEYPOINT DESCRIPTORS */
 
-      string matcherType = "MAT_FLANN";     // MAT_BF, MAT_FLANN
+      string matcherType = "MAT_BF";        // MAT_BF, MAT_FLANN
       string descriptorType = "DES_BINARY"; // DES_BINARY, DES_HOG
       string selectorType = "SEL_KNN";      // SEL_NN, SEL_KNN
       //// STUDENT ASSIGNMENT
