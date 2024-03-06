@@ -44,7 +44,7 @@ int main(int argc, const char *argv[]) {
       new FrameQueue(dataBufferSize); // list of data frames which are held in
                                       // memory at the same time
   // vector<DataFrame> dataBuffer;
-  bool bVis = false; // visualize results
+  bool bVis = true; // visualize results
 
   /* MAIN LOOP OVER ALL IMAGES */
 
@@ -79,7 +79,7 @@ int main(int argc, const char *argv[]) {
     // extract 2D keypoints from current image
     vector<cv::KeyPoint>
         keypoints; // create empty feature list for current image
-    string detectorType = "SHITOMASI";
+    string detectorType = "ORB";
 
     vector<string> detectorTypeToUse =
         vector<string>{"HARRIS", "SHITOMASI", "BRISK", "BRIEF",
@@ -89,39 +89,7 @@ int main(int argc, const char *argv[]) {
     /// matching2D.cpp and enable string-based selection based on detectorType /
     ///-> HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
 
-    const std::map<std::string, DetectorType> detectorDict{
-        {"HARRIS", DetectorType::HARRIS},
-        {"SHITOMASI", DetectorType::SHITOMASI},
-        {"BRISK", DetectorType::BRISK},
-        {"BRIEF", DetectorType::BRIEF},
-        {"FAST", DetectorType::FAST},
-        {"ORB", DetectorType::ORB},
-        {"SIFT", DetectorType::SIFT},
-        {"AKAZE", DetectorType::AKAZE}};
-
-    switch (detectorDict.at(detectorType)) {
-    case DetectorType::SHITOMASI: {
-
-      detKeypointsShiTomasi(keypoints, imgGray, bVis);
-    } break;
-    case DetectorType::FAST: {
-      detKeypointsModern(keypoints, imgGray, "FAST");
-    } break;
-    case DetectorType::HARRIS: {
-      detKeypointsHarris(keypoints, imgGray, bVis);
-    } break;
-    case DetectorType::BRISK: {
-    } break;
-    case DetectorType::BRIEF: {
-    } break;
-    case DetectorType::ORB: {
-    } break;
-    case DetectorType::AKAZE: {
-    } break;
-    case DetectorType::SIFT: {
-    } break;
-    }
-
+    detKeypointsModern(keypoints, imgGray, detectorType, bVis);
     // if (detectorType.compare("SHITOMASI") == 0) {
     //   detKeypointsShiTomasi(keypoints, imgGray, false);
     // } else if (detectorType.compare) {
@@ -135,15 +103,25 @@ int main(int argc, const char *argv[]) {
     // only keep keypoints on the preceding vehicle
     bool bFocusOnVehicle = true;
     cv::Rect vehicleRect(535, 180, 180, 150);
+    cout << "Filter Keypoints outside the target vehicle" << endl;
     if (bFocusOnVehicle) {
       // ...
+      keypoints.erase(
+          remove_if(keypoints.begin(), keypoints.end(),
+                    [&](cv::KeyPoint kp) {
+                      return !(vehicleRect.x < kp.pt.x &&
+                               kp.pt.x < vehicleRect.x + vehicleRect.width) ||
+                             !(vehicleRect.y < kp.pt.y &&
+                               kp.pt.y < vehicleRect.y + vehicleRect.height);
+                    }),
+          keypoints.end());
     }
 
     //// EOF STUDENT ASSIGNMENT
 
     // optional : limit number of keypoints (helpful for debugging and
     // learning) Debug only
-    bool bLimitKpts = false;
+    bool bLimitKpts = true;
     if (bLimitKpts) {
       int maxKeypoints = 50;
 
@@ -171,7 +149,7 @@ int main(int argc, const char *argv[]) {
     /// FREAK, AKAZE, SIFT
 
     cv::Mat descriptors;
-    string descriptorType = "BRISK"; // BRIEF, ORB, FREAK, AKAZE, SIFT
+    string descriptorType = "ORB"; // BRIEF, ORB, FREAK, AKAZE, SIFT
     descKeypoints(lastFrame->keypoints, lastFrame->cameraImg, descriptors,
                   descriptorType);
     //// EOF STUDENT ASSIGNMENT
@@ -187,14 +165,14 @@ int main(int argc, const char *argv[]) {
 
       /* MATCH KEYPOINT DESCRIPTORS */
 
-      string matcherType = "MAT_BF";        // MAT_BF, MAT_FLANN
+      string matcherType = "MAT_FLANN";     // MAT_BF, MAT_FLANN
       string descriptorType = "DES_BINARY"; // DES_BINARY, DES_HOG
-      string selectorType = "SEL_NN";       // SEL_NN, SEL_KNN
+      string selectorType = "SEL_KNN";      // SEL_NN, SEL_KNN
       //// STUDENT ASSIGNMENT
       //// TASK MP.5 -> add FLANN matching in file matching2D.cpp
-      //// TASK MP.6 -> add KNN match selection and perform descriptor
-      /// distance
-      /// ratio filtering with t=0.8 in file matching2D.cpp
+      //// TODO : TASK MP.6 -> add KNN match selection and perform descriptor
+      //// distance
+      //// ratio filtering with t=0.8 in file matching2D.cpp
       DataFrame *currentFrame = dataBuffer->getSecondLastFrame();
       vector<cv::DMatch> matches;
       matchDescriptors(currentFrame->keypoints, lastFrame->keypoints,
