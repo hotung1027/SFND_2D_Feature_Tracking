@@ -5,16 +5,16 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
-#include <sstream>
-#include <stdio.h>
-#include <vector>
-
+#include <map>
 #include <opencv2/core.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/xfeatures2d.hpp>
 #include <opencv2/xfeatures2d/nonfree.hpp>
+#include <sstream>
+#include <stdio.h>
+#include <vector>
 
 #include "dataStructures.h"
 
@@ -32,6 +32,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource,
                       std::string descriptorType, std::string matcherType,
                       std::string selectorType);
 
+// clang-format off
 enum class DetectorType : int {
   HARRIS = 0,
   SHITOMASI,
@@ -42,4 +43,33 @@ enum class DetectorType : int {
   SIFT,
   AKAZE
 };
+enum class DescriptorType : int {
+  BRISK,
+  BRIEF,
+  FREAK,
+  ORB,
+  SIFT,
+  AKAZE
+};
+const std::map<std::string, DescriptorType> DescriptorTypeDict{
+  { "BRISK",     DescriptorType::BRISK     },
+  { "BRIEF",     DescriptorType::BRIEF     },
+  { "FREAK",     DescriptorType::FREAK     },
+  { "ORB",       DescriptorType::ORB       },
+  { "SIFT",      DescriptorType::SIFT      },
+  { "AKAZE",     DescriptorType::AKAZE     }
+};
+
+const std::map<std::string, DetectorType> DetectorTypeDict{
+  { "HARRIS",    DetectorType::HARRIS    },
+  { "SHITOMASI", DetectorType::SHITOMASI },
+  { "BRISK",     DetectorType::BRISK     },
+  { "BRIEF",     DetectorType::BRIEF     },
+  { "FAST",      DetectorType::FAST      },
+  { "ORB",       DetectorType::ORB       },
+  { "SIFT",      DetectorType::SIFT      },
+  { "AKAZE",     DetectorType::AKAZE     }
+};
+// clang-format on
+
 #endif /* matching2D_hpp */
