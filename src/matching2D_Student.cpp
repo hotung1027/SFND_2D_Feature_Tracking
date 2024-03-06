@@ -53,10 +53,8 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource,
     }
   }
 }
-cv::Mat blurImage(cv::Mat &img, int radius) {
-  cv::Mat imgBlur;
+void blurImage(cv::Mat &img, cv::Mat &imgBlur, int radius) {
   cv::GaussianBlur(img, imgBlur, cv::Size(radius, radius), 0);
-  return imgBlur;
 }
 // Use one of several types of state-of-art descriptors to uniquely identify
 // keypoints
@@ -149,16 +147,22 @@ void detKeypointsHarris(vector<cv::KeyPoint> &keypoints, cv::Mat &img,
   // compute detector parameters
   int blockSize = 3;
   int apertureSize = 3;
-  double k = 0.5;
-  cv::Mat imgBlur = blurImage(img, blockSize);
+  double k = 0.05;
+  int thresh = 100;
+
+  cv::Mat imgBlur;
+  blurImage(img, imgBlur, blockSize);
   cv::Mat dst = cv::Mat::zeros(imgBlur.size(), CV_32FC1);
   cornerHarris(imgBlur, dst, blockSize, apertureSize, k);
   cv::Mat dst_norm, dst_norm_scaled;
   normalize(dst, dst_norm, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat());
   convertScaleAbs(dst_norm, dst_norm_scaled);
-  for (int i = 0; i < dst_norm_scaled.rows; i++) {
-    for (int j = 0; j < dst_norm_scaled.cols; j++) {
-      keypoints.push_back(cv::KeyPoint(cv::Point(j, i), apertureSize));
+
+  for (int i = 0; i < dst_norm.rows; i++) {
+    for (int j = 0; j < dst_norm.cols; j++) {
+      if ((int)dst_norm.at<float>(i, j) > thresh) {
+        keypoints.push_back(cv::KeyPoint(cv::Point(j, i), apertureSize));
+      }
     }
   }
   if (bVis) {
