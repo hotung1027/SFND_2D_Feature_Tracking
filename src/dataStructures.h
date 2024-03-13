@@ -39,7 +39,7 @@ public:
   // obtain the last frame from the queue
   DataFrame *getLastFrame();
   // obtain the second last frame from the queu
-  DataFrame *getSecondLastFrame();
+  DataFrame *getCurrentFrame();
   // Push the new frame to the back of the queue
   void push(DataFrame frame);
 };
@@ -53,14 +53,13 @@ inline void FrameQueue::push(DataFrame frame) {
   }
   if (this->dataBuffer.size() < (unsigned long)BUFFER_SIZE) {
     this->dataBuffer.push(frame);
-    this->currentFrame = this->lastFrame;
-    this->lastFrame = frame;
-
+    this->lastFrame = this->currentFrame;
+    this->currentFrame = frame;
   } else {
     this->dataBuffer.pop();
     this->dataBuffer.push(frame);
-    this->currentFrame = this->lastFrame;
-    this->lastFrame = frame;
+    this->lastFrame = this->currentFrame;
+    this->currentFrame = frame;
   }
 }
 inline DataFrame *FrameQueue::getNextFrame() {
@@ -69,7 +68,7 @@ inline DataFrame *FrameQueue::getNextFrame() {
   return frame;
 };
 inline DataFrame *FrameQueue::getLastFrame() { return &(this->lastFrame); };
-inline DataFrame *FrameQueue::getSecondLastFrame() {
+inline DataFrame *FrameQueue::getCurrentFrame() {
   return &(this->currentFrame);
 }
 
